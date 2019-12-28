@@ -3,7 +3,6 @@ package Calculator;
 import java.awt.BorderLayout;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,12 +14,16 @@ import javax.swing.SwingUtilities;
 
 public class calculator_gui extends JFrame implements ActionListener {
 	
-	private static String stringNumber;			//Will be used to display numbers in the numbers field
+	private static String stringNumber = "0";			//Will be used to display numbers in the numbers field
+	private static boolean firstInput = true;			//Checks to see if the value entered is the first input from the user
+	private static boolean firstArith = true;			//Checks to see if the arithmetic symbol was pushed more than once, if it does than it acts like an equal button plus its own feature
+	private static JTextField numField;					//Switched to Static since we are going to be accessing it throughout the program
 	
 	//Main Constructor
 	public calculator_gui() {
 		super("Nikko's Janky Calculator");
 		this.getContentPane().setPreferredSize(new Dimension(300,400));
+		this.setResizable(false);
 		this.setLayout(new BorderLayout());
 
 		//Adding Components
@@ -34,11 +37,15 @@ public class calculator_gui extends JFrame implements ActionListener {
 		this.pack();
 	}
 	
+	//Set Methods
+	public void setFirstInput(boolean fInput) {
+		this.firstInput = fInput;
+	}
 	
 	//Components
 	public void addNumbersField() {
 		//Display Numbers Field
-		JTextField numField = new JTextField(50);
+		numField = new JTextField("0");
 		numField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		numField.setEditable(false);
 		this.getContentPane().add(numField, BorderLayout.NORTH);
@@ -149,8 +156,81 @@ public class calculator_gui extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
+		String command = e.getActionCommand();
+		if(!stringNumber.contentEquals("0")) {
+			this.firstInput = true;
+		}
 		
+		if(this.firstInput) {						//Set the TextField to include the value rather than keep parsing it'
+			System.out.println("First Input: " + this.firstInput);
+			this.setFirstInput(false);				//Checks that the first input has been inputted
+			switch(command) {	
+				//Num Pad
+				case "1": numField.setText("1");
+					break;
+				case "2": numField.setText("2");
+					break;
+				case "3": numField.setText("3");
+					break;
+				case "4": numField.setText("4");
+					break;
+				case "5": numField.setText("5");
+					break;
+				case "6": numField.setText("6");
+					break;
+				case "7": numField.setText("7");
+					break;
+				case "8": numField.setText("8");
+					break;
+				case "9": numField.setText("9");
+					break;	
+			}
+			
+		}else {									//Not the first input
+			switch(command) {
+			case "1": numField.setText(numField.getText() + "1");
+				break;
+			case "2": numField.setText(numField.getText() + "2");
+				break;
+			case "3": numField.setText(numField.getText() + "3");
+				break;
+			case "4": numField.setText(numField.getText() + "4");
+				break;
+			case "5": numField.setText(numField.getText() + "5");
+				break;
+			case "6": numField.setText(numField.getText() + "6");
+				break;
+			case "7": numField.setText(numField.getText() + "7");
+				break;
+			case "8": numField.setText(numField.getText() + "8");
+				break;
+			case "9": numField.setText(numField.getText() + "9");
+				break;		
+			case "0": numField.setText(numField.getText() + "0");
+				break;		
+			}
+		}
 		
+		if(this.firstArith) {
+			arithmetic_methods.number1 = Double.parseDouble(numField.getText());				//Stores first input into the arithmetic_methods class
+			switch(command) {
+				case "+": arithmetic_methods.arithmeticNum = 1;
+					break;		
+				case "-": arithmetic_methods.arithmeticNum = 2;
+					break;
+				case "x": arithmetic_methods.arithmeticNum = 3;
+					break;
+				case "/": arithmetic_methods.arithmeticNum = 4;
+					break;
+			}
+			this.setFirstInput(true);															//Starts the second input
+			this.firstArith = false;
+		}else {
+			
+		}
+		
+		this.revalidate();
+		this.repaint();
 	}
 	
 	//Execution
