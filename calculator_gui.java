@@ -15,9 +15,13 @@ import javax.swing.SwingUtilities;
 public class calculator_gui extends JFrame implements ActionListener {
 	
 	private static String stringNumber = "0";			//Will be used to display numbers in the numbers field
-	private static boolean firstInput = true;			//Checks to see if the value entered is the first input from the user
-	private static boolean firstArith = true;			//Checks to see if the arithmetic symbol was pushed more than once, if it does than it acts like an equal button plus its own feature
 	private static JTextField numField;					//Switched to Static since we are going to be accessing it throughout the program
+	private static JTextField historyNumField;			//Display which numbers have been pressed along with their arithmetic symbol. (Note: Resets after equal)
+	
+	private static boolean nonZero = false;				//Checks to see if the value entered is the first input from the user
+	public static boolean firstInput = false;			//Checks to see if the first input was made (registered after pressing arithmetic symbol)
+	public static boolean secondInput = false;			//Checks to see if the second input was made (registered after clicking on another arithmetic symbol which includes "=")
+
 	
 	//Main Constructor
 	public calculator_gui() {
@@ -30,25 +34,32 @@ public class calculator_gui extends JFrame implements ActionListener {
 		this.addNumbersField();
 		this.addButtons();
 		
-		
 		//Updates
 		this.revalidate();
 		this.repaint();
 		this.pack();
 	}
 	
-	//Set Methods
-	public void setFirstInput(boolean fInput) {
-		this.firstInput = fInput;
-	}
+
 	
 	//Components
 	public void addNumbersField() {
+		JPanel fields = new JPanel();
+		fields.setLayout(new BorderLayout());
+		
+		historyNumField = new JTextField();
+		historyNumField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+		historyNumField.setEditable(false);
+		
 		//Display Numbers Field
 		numField = new JTextField("0");
 		numField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
 		numField.setEditable(false);
-		this.getContentPane().add(numField, BorderLayout.NORTH);
+		
+		fields.add(historyNumField,BorderLayout.NORTH);
+		fields.add(numField, BorderLayout.CENTER);
+		
+		this.getContentPane().add(fields, BorderLayout.NORTH);
 		
 	}
 	
@@ -157,77 +168,21 @@ public class calculator_gui extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 		String command = e.getActionCommand();
+		
 		if(!stringNumber.contentEquals("0")) {
-			this.firstInput = true;
+			this.nonZero = false;
 		}
 		
-		if(this.firstInput) {						//Set the TextField to include the value rather than keep parsing it'
-			System.out.println("First Input: " + this.firstInput);
-			this.setFirstInput(false);				//Checks that the first input has been inputted
-			switch(command) {	
-				//Num Pad
-				case "1": numField.setText("1");
-					break;
-				case "2": numField.setText("2");
-					break;
-				case "3": numField.setText("3");
-					break;
-				case "4": numField.setText("4");
-					break;
-				case "5": numField.setText("5");
-					break;
-				case "6": numField.setText("6");
-					break;
-				case "7": numField.setText("7");
-					break;
-				case "8": numField.setText("8");
-					break;
-				case "9": numField.setText("9");
-					break;	
-			}
-			
-		}else {									//Not the first input
-			switch(command) {
-			case "1": numField.setText(numField.getText() + "1");
-				break;
-			case "2": numField.setText(numField.getText() + "2");
-				break;
-			case "3": numField.setText(numField.getText() + "3");
-				break;
-			case "4": numField.setText(numField.getText() + "4");
-				break;
-			case "5": numField.setText(numField.getText() + "5");
-				break;
-			case "6": numField.setText(numField.getText() + "6");
-				break;
-			case "7": numField.setText(numField.getText() + "7");
-				break;
-			case "8": numField.setText(numField.getText() + "8");
-				break;
-			case "9": numField.setText(numField.getText() + "9");
-				break;		
-			case "0": numField.setText(numField.getText() + "0");
-				break;		
-			}
+		if(command.contentEquals("Clear")) {											//Resets the Fields
+			numField.setText("0");
+			historyNumField.setText("");
 		}
 		
-		if(this.firstArith) {
-			arithmetic_methods.number1 = Double.parseDouble(numField.getText());				//Stores first input into the arithmetic_methods class
-			switch(command) {
-				case "+": arithmetic_methods.arithmeticNum = 1;
-					break;		
-				case "-": arithmetic_methods.arithmeticNum = 2;
-					break;
-				case "x": arithmetic_methods.arithmeticNum = 3;
-					break;
-				case "/": arithmetic_methods.arithmeticNum = 4;
-					break;
-			}
-			this.setFirstInput(true);															//Starts the second input
-			this.firstArith = false;
-		}else {
-			
-		}
+		if(command.contentEquals("=")) {
+			historyNumField.setText(historyNumField.getText() + " = ");						//Adds the "=" in the history field
+			arithmetic_methods.numberList.removeAll(arithmetic_methods.numberList);			//Resets number list
+			arithmetic_methods.arithmeticList.removeAll(arithmetic_methods.arithmeticList); //Resets arithmetic list
+		}	
 		
 		this.revalidate();
 		this.repaint();

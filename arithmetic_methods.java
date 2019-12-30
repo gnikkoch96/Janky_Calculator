@@ -1,33 +1,37 @@
 package Calculator;
 
+import java.util.ArrayList;
+
 public class arithmetic_methods {
 	
 	//This value will change depending on what calculation is being performed
-	public static double results;						//What will displayed after calcuations are complete
-	public static double number1;						//Variable 1	
-	public static double number2;						//Variable 2
-	public static int arithmeticNum;					//Determines which arithemetic to execute
-	
+	public static double results;															//What will displayed after calculations are complete
+	public static double inputOne;															//Stores input one (Note: inputOne will end up containing the result if an arithmetic symbol was pushed instead of the equals sign)
+	public static double inputTwo;															//Stores input two
+	public static String arithSymbol;														//Stores the Arithmetic Symbol
+
 	//Conversion (Neg to Pos and Vice Versa)
 	public static double negConv() {
-		return number1 * (-1);
+		return inputOne * -1;
 	}
 		
 	//Equals
-	public void equals(int arithmeticNum) {
-		switch(arithmeticNum) {
-			case 1: //Adding
-				results = add(number1, number2);
-				break;
-			case 2: //Subtracting
-				results = subtract(number1, number2);
-				break;
-			case 3: //Multiplying
-				results = multiply(number1, number2);
-				break;
-			case 4: //Dividing
-				results = divide(number1, number2);
-				break;		
+	public void equals() {
+		if(calculator_gui.secondInput) {													//Only calculate when the second input has been submitted
+			switch(arithSymbol) {
+				case "+":
+					results += inputOne + inputTwo;
+					break;
+				case "-":
+					results -= inputOne - inputTwo;
+					break;
+				case "x":
+					results *= inputOne * inputTwo;
+					break;
+				case "/":
+					results /= inputOne / inputTwo;
+					break;
+			}
 		}
 	}
 	
