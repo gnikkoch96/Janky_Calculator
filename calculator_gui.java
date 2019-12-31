@@ -13,13 +13,18 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 public class calculator_gui extends JFrame implements ActionListener {
+	/*
+	 *  1. Can't hold to a large amount of number (non-scientific)
+	 */
 	
 	private static String stringNumber = "0";			//Will be used to display numbers in the numbers field
 	private static JTextField numField;					//Switched to Static since we are going to be accessing it throughout the program
 	private static JTextField historyNumField;			//Display which numbers have been pressed along with their arithmetic symbol. (Note: Resets after equal)
 	
 	private static boolean nonZero = false;				//Checks to see if the value entered is the first input from the user
-	public static boolean firstInput = false;			//Checks to see if the first input was made (registered after pressing arithmetic symbol)
+	private static boolean pressedArith = false;		//Checks to see if an arithmetic symbol was pressed
+	private static boolean initialNum = false;			//Checks to see if Number is the first number that is pressed so that the 0 can change to the number
+	private static boolean firstInput = false;			//Checks to see if the first input was made (registered after pressing arithmetic symbol)
 	public static boolean secondInput = false;			//Checks to see if the second input was made (registered after clicking on another arithmetic symbol which includes "=")
 
 	
@@ -38,8 +43,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 		this.revalidate();
 		this.repaint();
 		this.pack();
-	}
-	
+	}	
 
 	
 	//Components
@@ -164,25 +168,136 @@ public class calculator_gui extends JFrame implements ActionListener {
 		this.getContentPane().add(arithContainer, BorderLayout.CENTER);
 	}
 	
+	//Checks
+	public boolean checkArithmetic(String command) {	//Checks if any of the arithmetic buttons were pressed
+		if(command.contentEquals("+") || command.contentEquals("-") || command.contentEquals("x") || command.contentEquals("/"))
+			return true;
+		else
+			return false;
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
 		String command = e.getActionCommand();
 		
-		if(!stringNumber.contentEquals("0")) {
-			this.nonZero = false;
+		//Storing the Number (for inputOne and inputTwo)
+		if(!initialNum) {								//User hasn't pressed a number yet
+			switch(command) {	
+				case "1": numField.setText("1");
+					break;
+				case "2": numField.setText("2");
+					break;
+				case "3": numField.setText("3");
+					break;
+				case "4": numField.setText("4");
+					break;
+				case "5": numField.setText("5");
+					break;
+				case "6": numField.setText("6");
+					break;
+				case "7": numField.setText("7");
+					break;
+				case "8": numField.setText("8");
+					break;
+				case "9": numField.setText("9");
+					break;	
+			}		
+			initialNum = true;
+		}else {	
+			//User entered a number, so it must append to current string to obtain the actual value			
+			switch(command) {	
+			case "1": numField.setText(numField.getText() + "1");
+				break;
+			case "2": numField.setText(numField.getText() + "2");
+				break;
+			case "3": numField.setText(numField.getText() + "3");
+				break;
+			case "4": numField.setText(numField.getText() + "4");
+				break;
+			case "5": numField.setText(numField.getText() + "5");
+				break;
+			case "6": numField.setText(numField.getText() + "6");
+				break;
+			case "7": numField.setText(numField.getText() + "7");
+				break;
+			case "8": numField.setText(numField.getText() + "8");
+				break;
+			case "9": numField.setText(numField.getText() + "9");
+				break;
+			case "0": numField.setText(numField.getText() + "0");
+				break;
+			}
 		}
 		
-		if(command.contentEquals("Clear")) {											//Resets the Fields
-			numField.setText("0");
-			historyNumField.setText("");
+		//Storing the Arithmetic Symbol
+		if(checkArithmetic(command)) {																		//User pressed an arithmetic symbol
+			//Store Input One
+			firstInput = true;																				//Checks that the first input has been stored
+			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
+			historyNumField.setText(historyNumField.getText() + command + numField.getText());				//Stores the number pressed when an arithmetic symbol is pressed
+
+			//Store Arithmetic Symbol
+			arithmetic_methods.arithSymbol = command;
+			
+			//If Input Two hasn't been placed, then the symbols can still be replaced
+			if(!secondInput) {
+				arithmetic_methods.arithSymbol = command;
+			}
+			initialNum = false;																				//Preparing for the second input
+		}else if(firstInput && !checkArithmetic(command)) {																							
+			//Storing second input
+			if(!initialNum) {								//User hasn't pressed a number yet
+				switch(command) {	
+					case "1": numField.setText("1");
+						break;
+					case "2": numField.setText("2");
+						break;
+					case "3": numField.setText("3");
+						break;
+					case "4": numField.setText("4");
+						break;
+					case "5": numField.setText("5");
+						break;
+					case "6": numField.setText("6");
+						break;
+					case "7": numField.setText("7");
+						break;
+					case "8": numField.setText("8");
+						break;
+					case "9": numField.setText("9");
+						break;	
+					case "0": numField.setText("0");
+						break;
+				}		
+				initialNum = true;
+			}else {	
+				//User entered a number, so it must append to current string to obtain the actual value			
+				switch(command) {	
+				case "1": numField.setText(numField.getText() + "1");
+					break;
+				case "2": numField.setText(numField.getText() + "2");
+					break;
+				case "3": numField.setText(numField.getText() + "3");
+					break;
+				case "4": numField.setText(numField.getText() + "4");
+					break;
+				case "5": numField.setText(numField.getText() + "5");
+					break;
+				case "6": numField.setText(numField.getText() + "6");
+					break;
+				case "7": numField.setText(numField.getText() + "7");
+					break;
+				case "8": numField.setText(numField.getText() + "8");
+					break;
+				case "9": numField.setText(numField.getText() + "9");
+					break;
+				case "0": numField.setText(numField.getText() + "0");
+					break;
+				}
+			}
 		}
 		
-		if(command.contentEquals("=")) {
-			historyNumField.setText(historyNumField.getText() + " = ");						//Adds the "=" in the history field
-			arithmetic_methods.numberList.removeAll(arithmetic_methods.numberList);			//Resets number list
-			arithmetic_methods.arithmeticList.removeAll(arithmetic_methods.arithmeticList); //Resets arithmetic list
-		}	
+		
 		
 		this.revalidate();
 		this.repaint();
