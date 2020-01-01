@@ -185,7 +185,8 @@ public class calculator_gui extends JFrame implements ActionListener {
 		}
 		
 		//Displaying the Number (for inputOne and inputTwo)
-		if(!initialNum) {								//0 is the only number present
+		if(!initialNum) {																					//0 is the only number present
+			firstInput = true;																				//Checks that the first input has been stored
 			switch(command) {	
 				case "1": numField.setText("1");
 					break;
@@ -233,12 +234,27 @@ public class calculator_gui extends JFrame implements ActionListener {
 			}
 		}
 		
-		//Storing the Arithmetic Symbol
-		if(checkArithmetic(command) && !secondInput) {														//User pressed an arithmetic symbol
+		if(command.contentEquals("=") && (!firstInput || !secondInput)) {
+			//User Test: Pressing "=" with no values for inputOne and inputTwo
+			if(!firstInput) {
+				arithmetic_methods.inputOne = 0;
+				arithmetic_methods.inputTwo = 0;
+				historyNumField.setText("= 0 + 0");				
+			}else if (firstInput && !secondInput) {
+			//User Test: Pressing input One and then "=" will make input Two "0"
+				arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
+				arithmetic_methods.inputTwo = 0;						
+				historyNumField.setText(" = " +  0  + " + " + arithmetic_methods.inputOne);
+			}	
+		}else if(command.contentEquals("<X") && !checkArithmetic(command)){									
+			if(!(numField.getText().length() < 1))
+				numField.setText(numField.getText().substring(numField.getText().length() - 1, 0));			//Deletes a number 
+			else
+				numField.setText("0"); 																		//Goes back to 0
+		}else if(checkArithmetic(command) && !secondInput) {												//Input one is stored after pressing an arithmetic symbol										
 			//Store Input One
-			firstInput = true;																				//Checks that the first input has been stored
 			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
-			historyNumField.setText(historyNumField.getText() + command + numField.getText());				//Stores the number pressed when an arithmetic symbol is pressed
+			historyNumField.setText(command + numField.getText());											//Stores the number pressed when an arithmetic symbol is pressed
 
 			//Store Arithmetic Symbol
 			arithmetic_methods.arithSymbol = command;
@@ -248,10 +264,37 @@ public class calculator_gui extends JFrame implements ActionListener {
 				arithmetic_methods.arithSymbol = command;
 			}
 			pressedArith = true;
-		}else if(!checkArithmetic(command) && firstInput && pressedArith) {									//Checks that firstInput was stored and that button pressed was a number
-			//Second Input is in the process of being stored
+			
+			//Second Input is in the process of being stored		
+			initialNum = false;
+		}else if(!checkArithmetic(command) && firstInput && pressedArith && !secondInput) {					//Arithmetic symbol is stored after pressing a number after stage one		
 			secondInput = true;
-		}else if(checkArithmetic(command) && firstInput && secondInput) {
+			//Entering number for the second input
+			if(!initialNum) {								
+				switch(command) {	
+					case "1": numField.setText("1");
+						break;
+					case "2": numField.setText("2");
+						break;
+					case "3": numField.setText("3");
+						break;
+					case "4": numField.setText("4");
+						break;
+					case "5": numField.setText("5");
+						break;
+					case "6": numField.setText("6");
+						break;
+					case "7": numField.setText("7");
+						break;
+					case "8": numField.setText("8");
+						break;
+					case "9": numField.setText("9");
+						break;	
+				}		
+				initialNum = true;				
+			}
+			
+		}else if((checkArithmetic(command) || command.contentEquals("=")) && firstInput && secondInput) {
 			//Storing Input Two
 			arithmetic_methods.inputTwo = Double.parseDouble(numField.getText());
 			historyNumField.setText(historyNumField.getText() + command + numField.getText());	
@@ -265,18 +308,6 @@ public class calculator_gui extends JFrame implements ActionListener {
 			//Input One = Results
 			arithmetic_methods.inputOne = Double.parseDouble(stringResult);
 			secondInput = false;		
-		}else if(command.contentEquals("=")) {
-			//User Test: Pressing "=" with no values for inputOne and inputTwo
-			if(!firstInput) {
-				arithmetic_methods.inputOne = 0;
-				arithmetic_methods.inputTwo = 0;
-				historyNumField.setText("0 + 0 =");				
-			}else if (firstInput && !secondInput) {
-			//User Test: Pressing input One and then "=" will make input Two "0"
-				arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
-				arithmetic_methods.inputTwo = 0;						
-			}
-			stringResult = arithmetic_methods.equals();	
 		}
 		
 		this.revalidate();
