@@ -12,21 +12,20 @@ public class arithmetic_methods {
 
 
 	//Arithmetic Method
-	public static String equals() {
-		if(calculator_gui.secondInput) {													//Only calculate when the second input has been submitted
+	public static String equals() {		 
 			switch(arithSymbol) {
 				case "+":	//Adding
 					results += inputOne + inputTwo;
 					break;
 				case "-":	//Subtracting
-					results -= inputOne - inputTwo;
+					results += inputOne - inputTwo;
 					break;
-				case "x":	//Multiplying
-					results *= inputOne * inputTwo;
+				case "*":	//Multiplying
+					results += inputOne * inputTwo;
 					break;
 				case "/":	//Dividing
 					try {
-						results /= inputOne / inputTwo;
+						results += inputOne / inputTwo;
 					}catch(ArithmeticException e) {
 						e.printStackTrace();
 					}
@@ -35,7 +34,7 @@ public class arithmetic_methods {
 					results = inputOne * -1;
 					break;			
 			}		
-		}
+		
 		return Double.toString(results);
 	}
 }

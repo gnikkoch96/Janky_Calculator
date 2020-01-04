@@ -23,6 +23,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 	
 	private static boolean pressedArith = false;		//Checks to see if an arithmetic symbol was pressed (might not be necessary)
 	private static boolean initialNum = false;			//Checks to see if Number is the first number that is pressed so that the 0 can change to the number
+	private static boolean placedDot = false;			//Checks to see if the "." was pressed (Note: it can only be pressed once)
 	private static boolean firstInput = false;			//Checks to see if the first input was made (registered after pressing arithmetic symbol)
 	public static boolean secondInput = false;			//Checks to see if the second input was made (registered after clicking on another arithmetic symbol which includes "=")
 
@@ -42,6 +43,9 @@ public class calculator_gui extends JFrame implements ActionListener {
 		this.revalidate();
 		this.repaint();
 		this.pack();
+		
+		//Closing Operations
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}	
 
 	//Components
@@ -140,7 +144,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 		arithPad.setLayout(new GridLayout(5,1));		//4x1 Matrix
 		
 		add = new JButton("+");
-		mult = new JButton("x");
+		mult = new JButton("*");
 		sub = new JButton("-");
 		div = new JButton("/");
 		equals = new JButton("=");
@@ -169,7 +173,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 	//Checks
 	public boolean checkArithmetic(String command) {	//Checks if any of the arithmetic buttons were pressed
 		//Result: First Input is Solidified
-		if(command.contentEquals("+") || command.contentEquals("-") || command.contentEquals("x") || command.contentEquals("/"))
+		if(command.contentEquals("+") || command.contentEquals("-") || command.contentEquals("*") || command.contentEquals("/"))
 			return true;
 		else
 			return false;
@@ -183,7 +187,6 @@ public class calculator_gui extends JFrame implements ActionListener {
 		if(numField.getText().contentEquals("0")) {
 			initialNum = false;
 		}
-		
 		//Displaying the Number (for inputOne and inputTwo)
 		if(!initialNum) {																					//0 is the only number present
 			firstInput = true;																				//Checks that the first input has been stored
@@ -206,6 +209,9 @@ public class calculator_gui extends JFrame implements ActionListener {
 					break;
 				case "9": numField.setText("9");
 					break;	
+				case ".": numField.setText(".");
+					placedDot = true;
+					break;
 			}		
 			initialNum = true;
 		}else {	
@@ -231,6 +237,10 @@ public class calculator_gui extends JFrame implements ActionListener {
 				break;
 			case "0": numField.setText(numField.getText() + "0");
 				break;
+			case ".": numField.setText(".");
+				placedDot = true;
+				break;
+				
 			}
 		}
 		
@@ -254,7 +264,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 		}else if(checkArithmetic(command) && !secondInput) {												//Input one is stored after pressing an arithmetic symbol										
 			//Store Input One
 			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
-			historyNumField.setText(command + numField.getText());											//Stores the number pressed when an arithmetic symbol is pressed
+			historyNumField.setText(command + " " + numField.getText());											//Stores the number pressed when an arithmetic symbol is pressed
 
 			//Store Arithmetic Symbol
 			arithmetic_methods.arithSymbol = command;
@@ -269,6 +279,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 			initialNum = false;
 		}else if(!checkArithmetic(command) && firstInput && pressedArith && !secondInput) {					//Arithmetic symbol is stored after pressing a number after stage one		
 			secondInput = true;
+			
 			//Entering number for the second input
 			if(!initialNum) {								
 				switch(command) {	
@@ -289,15 +300,21 @@ public class calculator_gui extends JFrame implements ActionListener {
 					case "8": numField.setText("8");
 						break;
 					case "9": numField.setText("9");
-						break;	
+						break;
+					case ".": numField.setText(".");
+						placedDot = true;
+						break;
 				}		
 				initialNum = true;				
-			}
-			
+			}			
 		}else if((checkArithmetic(command) || command.contentEquals("=")) && firstInput && secondInput) {
 			//Storing Input Two
 			arithmetic_methods.inputTwo = Double.parseDouble(numField.getText());
-			historyNumField.setText(historyNumField.getText() + command + numField.getText());	
+			if(checkArithmetic(command)) {
+				historyNumField.setText(historyNumField.getText() + command + numField.getText());	
+			}else {
+				historyNumField.setText("= " + numField.getText() + " " + historyNumField.getText());	
+			}
 			
 			//Execute Calculation and Store Results
 			stringResult = arithmetic_methods.equals();
@@ -307,7 +324,10 @@ public class calculator_gui extends JFrame implements ActionListener {
 			
 			//Input One = Results
 			arithmetic_methods.inputOne = Double.parseDouble(stringResult);
-			secondInput = false;		
+			
+			//Preparing to continue after calculation
+			secondInput = false;	
+			initialNum = false;
 		}
 		
 		this.revalidate();
