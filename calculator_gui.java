@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class calculator_gui extends JFrame implements ActionListener {
@@ -24,6 +25,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 	private static boolean pressedArith = false;		//Checks to see if an arithmetic symbol was pressed (might not be necessary)
 	private static boolean initialNum = false;			//Checks to see if Number is the first number that is pressed so that the 0 can change to the number
 	private static boolean placedDot = false;			//Checks to see if the "." was pressed (Note: it can only be pressed once)
+	private static boolean convertNeg = false;			//False = didn't convert, true = convert
 	private static boolean firstInput = false;			//Checks to see if the first input was made (registered after pressing arithmetic symbol)
 	public static boolean secondInput = false;			//Checks to see if the second input was made (registered after clicking on another arithmetic symbol which includes "=")
 
@@ -54,12 +56,12 @@ public class calculator_gui extends JFrame implements ActionListener {
 		fields.setLayout(new BorderLayout());
 		
 		historyNumField = new JTextField();
-		historyNumField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+		historyNumField.setHorizontalAlignment(SwingConstants.RIGHT);
 		historyNumField.setEditable(false);
 		
 		//Display Numbers Field
 		numField = new JTextField("0");
-		numField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+		numField.setHorizontalAlignment(SwingConstants.RIGHT);
 		numField.setEditable(false);
 		
 		fields.add(historyNumField,BorderLayout.NORTH);
@@ -209,8 +211,11 @@ public class calculator_gui extends JFrame implements ActionListener {
 					break;
 				case "9": numField.setText("9");
 					break;	
-				case ".": numField.setText(".");
-					placedDot = true;
+				case ".": 
+					if(!placedDot) {
+						numField.setText("0.");
+						placedDot = true;
+					}
 					break;
 			}		
 			initialNum = true;
@@ -237,34 +242,88 @@ public class calculator_gui extends JFrame implements ActionListener {
 				break;
 			case "0": numField.setText(numField.getText() + "0");
 				break;
-			case ".": numField.setText(".");
-				placedDot = true;
+			case ".": 
+				if(!placedDot) {
+					numField.setText(numField.getText() + ".");
+					placedDot = true;
+				}
 				break;
 				
 			}
 		}
 		
-		if(command.contentEquals("=") && (!firstInput || !secondInput)) {
+		//Equals User Tests
+		if(command.contentEquals("=") && (!firstInput || !secondInput)) {									
 			//User Test: Pressing "=" with no values for inputOne and inputTwo
 			if(!firstInput) {
 				arithmetic_methods.inputOne = 0;
 				arithmetic_methods.inputTwo = 0;
-				historyNumField.setText("= 0 + 0");				
+				historyNumField.setText("0 + 0 =");				
 			}else if (firstInput && !secondInput) {
 			//User Test: Pressing input One and then "=" will make input Two "0"
 				arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
-				arithmetic_methods.inputTwo = 0;						
-				historyNumField.setText(" = " +  0  + " + " + arithmetic_methods.inputOne);
+				arithmetic_methods.inputTwo = arithmetic_methods.inputOne;						
+				historyNumField.setText(arithmetic_methods.inputOne + " " + arithmetic_methods.arithSymbol + " " + arithmetic_methods.inputOne + " =");
+				
+				//Calculate
+				stringResult = arithmetic_methods.equals();
+				
+				//Display
+				numField.setText(stringResult);
 			}	
-		}else if(command.contentEquals("<X") && !checkArithmetic(command)){									
-			if(!(numField.getText().length() < 1))
-				numField.setText(numField.getText().substring(numField.getText().length() - 1, 0));			//Deletes a number 
-			else
-				numField.setText("0"); 																		//Goes back to 0
+		//Delete 
+		}else if(command.contentEquals("<X")){			
+			//The value of numField remains 0 if the user tries to delete values when it is 0
+			if(!numField.getText().contentEquals("0")) {
+				String currentNum = numField.getText();
+				//-2 since -1 to adjust and another -1 to take away one
+				currentNum = currentNum.substring(0, currentNum.length() - 1);		
+				numField.setText(currentNum);
+		
+				if(currentNum.length() == 0)	
+					//When the last number is a single digit, then it reverts to 0 if it is deleted
+					numField.setText("0");
+			}
+			
+		//Clear Field
+		}else if(command.contentEquals("Clear")) {
+			//Resets everything
+			pressedArith = false;
+			initialNum = false;
+			firstInput = false;
+			secondInput = false;
+			placedDot = false;
+			convertNeg = false;
+			
+			historyNumField.setText("");
+			numField.setText("0");
+			
+			arithmetic_methods.inputOne = 0;
+			arithmetic_methods.inputTwo = 0;
+		
+			
+		//Inverse Sign (as long as the value doesn't equal to 0)
+		}else if(command.contentEquals("+/-") && !numField.getText().contentEquals("0")) {
+			//Store +/-
+			arithmetic_methods.arithSymbol = command;
+			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
+			
+			//Execute and Display
+			if(!convertNeg) {
+				//Adds "-"
+				numField.setText("-" + numField.getText());
+				convertNeg = true;
+			}else {
+				//Removes "-"
+				numField.setText(numField.getText().substring(1, numField.getText().length()));
+				convertNeg = false;
+			}
+		
 		}else if(checkArithmetic(command) && !secondInput) {												//Input one is stored after pressing an arithmetic symbol										
+			convertNeg = false;
 			//Store Input One
 			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
-			historyNumField.setText(command + " " + numField.getText());											//Stores the number pressed when an arithmetic symbol is pressed
+			historyNumField.setText(numField.getText() + " " + command);									//Stores the number pressed when an arithmetic symbol is pressed
 
 			//Store Arithmetic Symbol
 			arithmetic_methods.arithSymbol = command;
@@ -301,9 +360,14 @@ public class calculator_gui extends JFrame implements ActionListener {
 						break;
 					case "9": numField.setText("9");
 						break;
-					case ".": numField.setText(".");
-						placedDot = true;
+					case ".":
+						if(!placedDot) {
+							numField.setText("0.");
+							placedDot = true;
+						}
 						break;
+						
+						
 				}		
 				initialNum = true;				
 			}			
@@ -311,9 +375,10 @@ public class calculator_gui extends JFrame implements ActionListener {
 			//Storing Input Two
 			arithmetic_methods.inputTwo = Double.parseDouble(numField.getText());
 			if(checkArithmetic(command)) {
-				historyNumField.setText(historyNumField.getText() + command + numField.getText());	
+				historyNumField.setText(historyNumField.getText() +  " " + numField.getText() + " " + command);	
 			}else {
-				historyNumField.setText("= " + numField.getText() + " " + historyNumField.getText());	
+				historyNumField.setText(historyNumField.getText() + " " + numField.getText() + " =");
+				
 			}
 			
 			//Execute Calculation and Store Results
