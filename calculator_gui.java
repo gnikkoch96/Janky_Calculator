@@ -286,7 +286,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 				//-2 since -1 to adjust and another -1 to take away one
 				currentNum = currentNum.substring(0, currentNum.length() - 1);		
 				numField.setText(currentNum);
-		
+
 				if(currentNum.length() == 0)	
 					//When the last number is a single digit, then it reverts to 0 if it is deleted
 					numField.setText("0");
@@ -300,8 +300,11 @@ public class calculator_gui extends JFrame implements ActionListener {
 			firstInput = false;
 			secondInput = false;
 			placedDot = false;
+
 			convertNeg = false;
 			
+
+
 			historyNumField.setText("");
 			numField.setText("0");
 			
@@ -315,6 +318,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 			arithmetic_methods.arithSymbol = command;
 			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
 			
+
 			//Execute and Display
 			if(!convertNeg) {
 				//Adds "-"
@@ -328,6 +332,15 @@ public class calculator_gui extends JFrame implements ActionListener {
 		
 		}else if(checkArithmetic(command) && !secondInput) {												//Input one is stored after pressing an arithmetic symbol										
 			convertNeg = false;
+
+			//Execute
+			stringResult = arithmetic_methods.equals();
+			
+			//Display
+			numField.setText(stringResult);
+			
+		}else if(checkArithmetic(command) && !secondInput) {														//Input one is stored after pressing an arithmetic symbol										
+
 			//Store Input One
 			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
 			historyNumField.setText(numField.getText() + " " + command);									//Stores the number pressed when an arithmetic symbol is pressed
