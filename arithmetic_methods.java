@@ -15,24 +15,21 @@ public class arithmetic_methods {
 	public static String equals() {		 
 			switch(arithSymbol) {
 				case "+":	//Adding
-					results += inputOne + inputTwo;
+					results = inputOne + inputTwo;
 					break;
 				case "-":	//Subtracting
-					results += inputOne - inputTwo;
+					results = inputOne - inputTwo;
 					break;
 				case "*":	//Multiplying
-					results += inputOne * inputTwo;
+					results = inputOne * inputTwo;
 					break;
 				case "/":	//Dividing
 					try {
-						results += inputOne / inputTwo;
+						results = inputOne / inputTwo;
 					}catch(ArithmeticException e) {
 						e.printStackTrace();
 					}
-					break;
-				case "+/-":	//Conversing Neg to Pos 
-					results = inputOne * -1;
-					break;			
+					break;	
 			}		
 		
 		return Double.toString(results);

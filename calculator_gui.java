@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -22,9 +24,12 @@ public class calculator_gui extends JFrame implements ActionListener {
 	private static JTextField numField;					//Switched to Static since we are going to be accessing it throughout the program
 	private static JTextField historyNumField;			//Display which numbers have been pressed along with their arithmetic symbol. (Note: Resets after equal)
 	
+	private static ArrayList<String> symbolsList;		//Stores each symbol pressed, this is used to display the previous symbol (if necessary)
 	private static boolean pressedArith = false;		//Checks to see if an arithmetic symbol was pressed (might not be necessary)
+	private static boolean pressedEqual = false;		//For User Test: Presssing Equals makes inputOne = result and inputTwo = same
 	private static boolean initialNum = false;			//Checks to see if Number is the first number that is pressed so that the 0 can change to the number
 	private static boolean placedDot = false;			//Checks to see if the "." was pressed (Note: it can only be pressed once)
+	private static boolean convertNeg = false;			//False = didn't convert, true = convert
 	private static boolean firstInput = false;			//Checks to see if the first input was made (registered after pressing arithmetic symbol)
 	public static boolean secondInput = false;			//Checks to see if the second input was made (registered after clicking on another arithmetic symbol which includes "=")
 
@@ -47,6 +52,8 @@ public class calculator_gui extends JFrame implements ActionListener {
 		
 		//Closing Operations
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		symbolsList = new ArrayList<String>();
 	}	
 
 	//Components
@@ -55,7 +62,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 		fields.setLayout(new BorderLayout());
 		
 		historyNumField = new JTextField();
-		historyNumField.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+		historyNumField.setHorizontalAlignment(SwingConstants.RIGHT);
 		historyNumField.setEditable(false);
 		
 		//Display Numbers Field
@@ -188,6 +195,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 		if(numField.getText().contentEquals("0")) {
 			initialNum = false;
 		}
+		
 		//Displaying the Number (for inputOne and inputTwo)
 		if(!initialNum) {																					//0 is the only number present
 			firstInput = true;																				//Checks that the first input has been stored
@@ -257,12 +265,18 @@ public class calculator_gui extends JFrame implements ActionListener {
 			if(!firstInput) {
 				arithmetic_methods.inputOne = 0;
 				arithmetic_methods.inputTwo = 0;
-				historyNumField.setText("= 0 + 0");				
+				historyNumField.setText("0 + 0 =");				
 			}else if (firstInput && !secondInput) {
 			//User Test: Pressing input One and then "=" will make input Two "0"
 				arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
-				arithmetic_methods.inputTwo = 0;						
-				historyNumField.setText(" = " +  0  + " + " + arithmetic_methods.inputOne);
+				arithmetic_methods.inputTwo = arithmetic_methods.inputOne;						
+				historyNumField.setText(arithmetic_methods.inputOne + " " + arithmetic_methods.arithSymbol + " " + arithmetic_methods.inputOne + " =");
+				
+				//Calculate
+				stringResult = arithmetic_methods.equals();
+				
+				//Display
+				numField.setText(stringResult);
 			}	
 		//Delete 
 		}else if(command.contentEquals("<X")){			
@@ -272,8 +286,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 				//-2 since -1 to adjust and another -1 to take away one
 				currentNum = currentNum.substring(0, currentNum.length() - 1);		
 				numField.setText(currentNum);
-				
-				System.out.println(currentNum.length());
+		
 				if(currentNum.length() == 0)	
 					//When the last number is a single digit, then it reverts to 0 if it is deleted
 					numField.setText("0");
@@ -287,6 +300,8 @@ public class calculator_gui extends JFrame implements ActionListener {
 			firstInput = false;
 			secondInput = false;
 			placedDot = false;
+			convertNeg = false;
+			
 			historyNumField.setText("");
 			numField.setText("0");
 			
@@ -300,19 +315,26 @@ public class calculator_gui extends JFrame implements ActionListener {
 			arithmetic_methods.arithSymbol = command;
 			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
 			
-			//Execute
-			stringResult = arithmetic_methods.equals();
-			
-			//Display
-			numField.setText(stringResult);
-			
-		}else if(checkArithmetic(command) && !secondInput) {														//Input one is stored after pressing an arithmetic symbol										
+			//Execute and Display
+			if(!convertNeg) {
+				//Adds "-"
+				numField.setText("-" + numField.getText());
+				convertNeg = true;
+			}else {
+				//Removes "-"
+				numField.setText(numField.getText().substring(1, numField.getText().length()));
+				convertNeg = false;
+			}
+		
+		}else if(checkArithmetic(command) && !secondInput) {												//Input one is stored after pressing an arithmetic symbol										
+			convertNeg = false;
 			//Store Input One
 			arithmetic_methods.inputOne = Double.parseDouble(numField.getText());
-			historyNumField.setText(command + " " + numField.getText());											//Stores the number pressed when an arithmetic symbol is pressed
+			historyNumField.setText(numField.getText() + " " + command);									//Stores the number pressed when an arithmetic symbol is pressed
 
 			//Store Arithmetic Symbol
 			arithmetic_methods.arithSymbol = command;
+			symbolsList.add(command);
 			
 			//If Input Two hasn't been placed, then the symbols can still be replaced
 			if(!secondInput) {
@@ -352,16 +374,37 @@ public class calculator_gui extends JFrame implements ActionListener {
 							placedDot = true;
 						}
 						break;
+						
+						
 				}		
 				initialNum = true;				
 			}			
 		}else if((checkArithmetic(command) || command.contentEquals("=")) && firstInput && secondInput) {
-			//Storing Input Two
-			arithmetic_methods.inputTwo = Double.parseDouble(numField.getText());
+			if(!pressedEqual) {
+				//Storing Input Two
+				arithmetic_methods.inputTwo = Double.parseDouble(numField.getText());
+			}
+			
 			if(checkArithmetic(command)) {
-				historyNumField.setText(historyNumField.getText() + command + numField.getText());	
-			}else {
-				historyNumField.setText("= " + numField.getText() + " " + historyNumField.getText());	
+				//Pressing Arithmetic Symbol
+				historyNumField.setText(historyNumField.getText() +  " " + numField.getText() + " " + command);	
+				
+				//Stores Symbol
+				symbolsList.add(command);
+				
+			}else {	
+				//Pressing Equal
+				if(!pressedEqual)
+					historyNumField.setText(historyNumField.getText() + " " + numField.getText() + " =");
+				else
+					//Displays with original Arithmetic Symbol
+					historyNumField.setText(arithmetic_methods.inputOne + " " + symbolsList.get(symbolsList.size() - 1) + " " + arithmetic_methods.inputTwo + " =");
+				
+			}
+			
+			if(!command.contentEquals("=")) {
+				//Store updated Symbol
+				arithmetic_methods.arithSymbol = command;
 			}
 			
 			//Execute Calculation and Store Results
@@ -372,10 +415,20 @@ public class calculator_gui extends JFrame implements ActionListener {
 			
 			//Input One = Results
 			arithmetic_methods.inputOne = Double.parseDouble(stringResult);
+			System.out.println("Input One: " + arithmetic_methods.inputOne);
+			System.out.println("Input Two: " + arithmetic_methods.inputTwo);
 			
-			//Preparing to continue after calculation
-			secondInput = false;	
-			initialNum = false;
+			if(!command.contentEquals("=")) {											//If the User presses "=" again -> inputOne = results and inputTwo = stays the same
+				historyNumField.setText(arithmetic_methods.inputOne + " " + command);
+				
+				//Preparing to continue after calculation
+				secondInput = false;	
+				initialNum = false;
+				
+				pressedEqual = false;
+			}else {																		//Pressed Equal
+				pressedEqual = true;
+			}
 		}
 		
 		this.revalidate();
