@@ -30,6 +30,7 @@ public class calculator_gui extends JFrame implements ActionListener {
 	private static boolean initialNum = false;			//Checks to see if Number is the first number that is pressed so that the 0 can change to the number
 	private static boolean placedDot = false;			//Checks to see if the "." was pressed (Note: it can only be pressed once)
 	private static boolean convertNeg = false;			//False = didn't convert, true = convert
+	private static boolean checkEqual = false;			//Used to divert display options after user presses multiple "="s and then an arithmetic
 	private static boolean firstInput = false;			//Checks to see if the first input was made (registered after pressing arithmetic symbol)
 	public static boolean secondInput = false;			//Checks to see if the second input was made (registered after clicking on another arithmetic symbol which includes "=")
 
@@ -379,6 +380,8 @@ public class calculator_gui extends JFrame implements ActionListener {
 				}		
 				initialNum = true;				
 			}			
+			
+		//Calculating result
 		}else if((checkArithmetic(command) || command.contentEquals("=")) && firstInput && secondInput) {
 			if(!pressedEqual) {
 				//Storing Input Two
@@ -396,16 +399,13 @@ public class calculator_gui extends JFrame implements ActionListener {
 				//Pressing Equal
 				if(!pressedEqual)
 					historyNumField.setText(historyNumField.getText() + " " + numField.getText() + " =");
-				else
+				else {
 					//Displays with original Arithmetic Symbol
 					historyNumField.setText(arithmetic_methods.inputOne + " " + symbolsList.get(symbolsList.size() - 1) + " " + arithmetic_methods.inputTwo + " =");
-				
+					checkEqual = true;
+				}
 			}
 			
-			if(!command.contentEquals("=")) {
-				//Store updated Symbol
-				arithmetic_methods.arithSymbol = command;
-			}
 			
 			//Execute Calculation and Store Results
 			stringResult = arithmetic_methods.equals();
@@ -419,12 +419,14 @@ public class calculator_gui extends JFrame implements ActionListener {
 			System.out.println("Input Two: " + arithmetic_methods.inputTwo);
 			
 			if(!command.contentEquals("=")) {											//If the User presses "=" again -> inputOne = results and inputTwo = stays the same
-				historyNumField.setText(arithmetic_methods.inputOne + " " + command);
+				if(checkEqual)
+					historyNumField.setText(arithmetic_methods.inputOne + " " + command);
 				
 				//Preparing to continue after calculation
 				secondInput = false;	
 				initialNum = false;
 				
+				checkEqual = false;
 				pressedEqual = false;
 			}else {																		//Pressed Equal
 				pressedEqual = true;
