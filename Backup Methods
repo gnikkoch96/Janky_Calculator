@@ -1,0 +1,50 @@
+else if((checkArithmetic(command) || command.contentEquals("=")) && firstInput && secondInput) {
+			if(!pressedEqual) {
+				//Storing Input Two
+				arithmetic_methods.inputTwo = Double.parseDouble(numField.getText());
+			}
+			
+			if(checkArithmetic(command)) {
+				//Pressing Arithmetic Symbol
+				historyNumField.setText(historyNumField.getText() +  " " + numField.getText() + " " + command);	
+				
+				//Stores Symbol
+				symbolsList.add(command);
+				
+			}else {	
+				//Pressing Equal
+				if(!pressedEqual)
+					historyNumField.setText(historyNumField.getText() + " " + numField.getText() + " =");
+				else {
+					//Displays with original Arithmetic Symbol
+					historyNumField.setText(arithmetic_methods.inputOne + " " + symbolsList.get(symbolsList.size() - 1) + " " + arithmetic_methods.inputTwo + " =");
+					checkEqual = true;
+				}
+			}
+			
+			
+			//Execute Calculation and Store Results
+			stringResult = arithmetic_methods.equals();
+			
+			//Display Results
+			numField.setText(stringResult);
+			
+			//Input One = Results
+			arithmetic_methods.inputOne = Double.parseDouble(stringResult);
+			System.out.println("Input One: " + arithmetic_methods.inputOne);
+			System.out.println("Input Two: " + arithmetic_methods.inputTwo);
+			
+			if(!command.contentEquals("=")) {											//If the User presses "=" again -> inputOne = results and inputTwo = stays the same
+				if(checkEqual)
+					historyNumField.setText(arithmetic_methods.inputOne + " " + command);
+				
+				//Preparing to continue after calculation
+				secondInput = false;	
+				initialNum = false;
+				
+				checkEqual = false;
+				pressedEqual = false;
+			}else {																		//Pressed Equal
+				pressedEqual = true;
+			}
+		}
